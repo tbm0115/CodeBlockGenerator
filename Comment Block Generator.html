@@ -1,0 +1,99 @@
+<html>
+	<head>
+		<style>
+			#pnlResults{
+				font-family: monospace;
+			}
+		</style>
+		<script src='https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js'></script><link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' rel='stylesheet' integrity='sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==' crossorigin='anonymous'/><script type='text/javascript' src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js' integrity='sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==' crossorigin='anonymous'></script>
+		<script type="text/javascript">
+			function DrawCommentBlock(txt){
+				copyAlert.style.display = "none";
+				var out = "";
+				var maxCount = parseInt(txtCommentCount.value);
+				var cmnt = txtCommentChar.value;
+				out = cmnt + " " + Array(maxCount).join(txtFillChar.value) + "\n"; // Starting block
+				var chrs = Array(parseInt(((maxCount+1)-txt.length)/2)).join("*");
+				out += cmnt + " " + chrs + txt + chrs + "\n"; // Header
+				if (txtNotes.value != ""){
+					out += cmnt + "\n"; // Give a bit of space between header and notes
+					out += cmnt + " Notes:\n"; // Give a bit of space between header and notes
+					var ln = "";
+					var words = txtNotes.value.split(" ");
+					for (var len = words.length, n = 0; n < len; n++){
+						if ((ln.length + words[n].length + 1) > (maxCount-5)){
+						out += cmnt + Array(6).join("&nbsp;") + ln + "\n";
+							ln = "";
+						}
+						if (words[n].indexOf("\n") > 0){
+							console.log(words[n]);
+							ln += words[n].replace(/\n/g, "\n" + cmnt + Array(6).join("&nbsp;"));
+						}else{
+							ln += words[n] + " ";
+						}
+					}
+					if (ln.length > 0){
+						out += cmnt + Array(6).join("&nbsp;") + ln + "\n";
+					}
+					out += cmnt + "\n"; // Give a bit of space between header and notes
+				}
+				out += cmnt + " " + Array(maxCount).join(txtFillChar.value) + "\n"; // Closing block
+				pnlResults.innerHTML = out;
+			}
+			var copyAlert
+			
+			window.onload = function(){
+				var copyTextareaBtn = document.querySelector('#btnCopy');
+				copyAlert = document.querySelector("#alertCopy");
+				copyTextareaBtn.addEventListener('click', function(event) {
+					var copyTextarea = document.querySelector('#pnlResults');
+					copyTextarea.select();
+
+					try {
+						var successful = document.execCommand('copy');
+						var msg = successful ? 'successful' : 'unsuccessful';
+						copyAlert.innerHTML = "Copying generated comment block was " + msg;
+						console.log('Copying text command was ' + msg);
+					} catch (err) {
+						console.log('Oops, unable to copy');
+						copyAlert.innerHTML = "Oops, unable to copy due to error: " + err;
+					}
+					copyAlert.style.display = "block";
+				});
+			}
+		</script>
+	</head>
+	<body class="container">
+		<h1 class="jumbotron">Comment Block Generator</h1>
+		<div class="row">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<label class="label label-default">Enter Comment Character Count</label><input type="number" class="form-control" id="txtCommentCount" value="75" pattern="([0-9]+)" />
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<label class="label label-default">Enter Comment Character String</label><input type="text" class="form-control" id="txtCommentChar" value="//" list="lstCommentCharacters" />
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+				<label class="label label-default">Enter Fill Character</label><input type="text" class="form-control" id="txtFillChar" value="*" list="lstFillCharacters" />
+			</div>
+		</div>
+		
+		<label class="label label-default">Enter Label Text</label><input type="text" class="form-control" id="txtLabelText" />
+		<label class="label label-default">(Optional) Notes</label><a class="close" onclick="txtNotes.innerHTML='';txtNotes.focus();">clear</a><textarea class="form-control" id="txtNotes" rows="10"></textarea>
+		<button type="button" class="btn btn-default btn-block" onclick="DrawCommentBlock(txtLabelText.value);"><span class="glyphicon glyphicon-ok"></span> Generate</button>
+		
+		<div>
+			<textarea id="pnlResults" class="form-control" rows="15" readonly></textarea><a class="close" id="btnCopy">copy</a>
+			<p id="alertCopy" class="alert alert-success" style="display: none;">Successfully copied generated text.</p>
+		</div>
+		
+		<datalist id="lstCommentCharacters">
+			<option>//</option>
+			<option>''</option>
+		</datalist>
+		<datalist id="lstFillCharacters">
+			<option>*</option>
+			<option>/</option>
+			<option>\</option>
+		</datalist>
+	</body>
+</html>
